@@ -5,21 +5,23 @@
 The experiment script was used to test the ponser cueing task.
 """
 
-## import packages
 import random, os
 from psychopy import visual, core, event, gui, monitors
 
-## Open a window
 # Set up the monitor parameters, so we can use 'deg' as the screen units
 mon = monitors.Monitor("mac", width=25.0, distance=60.0)
-mon.setSizePix([1440,900]) # pixel size of the full screen
+mon.setSizePix([1440, 900]) # pixel size of the full screen
 
 # Open a window
 win = visual.Window((1280, 800), monitor=mon, units="deg", fullscr=False,
                     color=(0,0,0), colorSpace='rgb255')
 
+## ======================================= ##
+##       Define everthing we need          ##
+## ======================================= ##
+
 ## target position
-target_pos = {'left':(-4,0),'right':(4,0)}
+target_pos = {'left':(-4, 0),'right':(4, 0)}
 
 ## Initilize some stimuli
 text_msg = visual.TextStim(win, text='message', font='Songti SC', height=0.8)
@@ -63,9 +65,15 @@ def quit_func():
     win.flip()
     core.wait(2)
     
+    data_file.close()
     win.close()
     core.quit()
     
+## add global event keys to shutdown the program at any time
+event.globalKeys.clear()
+for key in ['q','escape']:
+    event.globalKeys.add(key, func=quit_func)
+
 ## define the run trial
 def runTrial(trial_pars, data_file, subjInfo, mode):
     """
@@ -82,7 +90,7 @@ def runTrial(trial_pars, data_file, subjInfo, mode):
     cue_pos, tar_pos, corr_key = trial_pars
     
     ## Now, let's present the first frame on the screen (fixation + squares)
-    # draw a fixation cross
+    # phase 1: draw a fixation cross
     line_h.draw()
     line_v.draw()
     # draw two squares on the left and right sides
@@ -94,7 +102,7 @@ def runTrial(trial_pars, data_file, subjInfo, mode):
     win.flip()
     core.wait(1)
     
-    ## let's present a cue
+    ## phase 2: let's present a cue
     if cue_pos == 'cue_left':
         line_h.setStart((-0.4,0))
     elif cue_pos == 'cue_right':
@@ -110,7 +118,7 @@ def runTrial(trial_pars, data_file, subjInfo, mode):
     win.flip()
     core.wait(0.25)
     
-    ## let's present a blank between the cue and target
+    ## phase 3: let's present a blank between the cue and target
     # remeber to restore the line
     line_h.setStart((-0.2,0))
     line_h.setEnd((0.2,0))
@@ -125,7 +133,7 @@ def runTrial(trial_pars, data_file, subjInfo, mode):
     win.flip()
     core.wait(0.2)
     
-    ## let's present the target
+    ## phase 4: let's present the target
     if tar_pos == 'tar_left':
         poly.setPos(target_pos['left'])
     elif tar_pos == 'tar_right':
@@ -144,7 +152,7 @@ def runTrial(trial_pars, data_file, subjInfo, mode):
     tar_onset = core.getTime()
     core.wait(0.05)
     
-    ## wait for a key response
+    ## phase 5: wait for a key response
     line_h.draw()
     line_v.draw()    
     
@@ -156,7 +164,7 @@ def runTrial(trial_pars, data_file, subjInfo, mode):
     win.flip()
     tar_resp = event.waitKeys(2.95, ['z', 'slash'], timeStamped=True)
     
-    ## give a feedback
+    ## phase 6: give a feedback
     if tar_resp != None:
         resp_key = tar_resp[0][0] # index the resp key if key is pressed
         
@@ -190,7 +198,7 @@ def runTrial(trial_pars, data_file, subjInfo, mode):
     trial_data = map(str, trial_data)
     data_file.write(','.join(trial_data) + '\n')
 
-    ## clear the screen and set a random ITI
+    ## phase 7: clear the screen and set a random ITI
     line_h.setColor((255,255,255))
     line_v.setColor((255,255,255))
     line_h.draw()
@@ -201,11 +209,6 @@ def runTrial(trial_pars, data_file, subjInfo, mode):
     rect.draw() 
     win.flip()
     core.wait(random.choice(range(1000, 2001))*0.001)
-    
-    ## add global event keys to shutdown the program at any time
-    event.globalKeys.clear()
-    for key in ['q','escape']:
-        event.globalKeys.add(key, func=quit_func)
     
     
 ## define the run block
@@ -228,7 +231,10 @@ def runBlock(mode, DATA_FILE, SUBJ_INFO):
         trialCount += 1
 
     
-## ---------- Real experiment starts from here ----------##
+## ======================================= ##
+##    Real experiment starts from here     ##
+## ======================================= ##
+
 ## Hide the full screen before the gui dialog
 #win.winHandle.set_fullscreen(False) # use on mac only, remove it if you run on Windows
 #win.winHandle.set_visible(False) 
@@ -253,23 +259,25 @@ event.Mouse(visible=False) # will use win by default
 # let's flip one frame at first to solve the non full scr problem, 
 # not sure the specific reason now.
 win.flip()
-
 text_msg.text = u"红色五边形出现在左侧时按z键，\n出现在右侧时按/键。\n\n按空格键开始实验！"
 text_msg.draw()
 win.flip()
 event.waitKeys(keyList=['space'])
 
-# run practice trials
+## run practice trials
 runBlock('prac', data_file, participant)
+
 # practice ends here, give a message to the participant
 text_msg.text = u"练习结束, 按空格键开始正式实验!"
 text_msg.draw()
 win.flip()
 event.waitKeys(keyList=['space'])
-# run main test trials
+
+## run main test trials
 runBlock('test', data_file, participant)
 
-# exit the program elegantly
+
+## exit the program elegantly
 text_msg.text = u"实验结束，感谢您的参与！"
 text_msg.draw()
 win.flip()
