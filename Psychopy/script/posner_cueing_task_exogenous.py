@@ -18,6 +18,10 @@ mon.setSizePix([1440,900]) # pixel size of the full screen
 win = visual.Window((1280, 800), monitor=mon, units="deg", fullscr=False,
                     color=(0,0,0), colorSpace='rgb255')
 
+## ======================================= ##
+##       Define everthing we need          ##
+## ======================================= ##
+
 ## target position
 target_pos = {'left':(-4,0),'right':(4,0)}
 
@@ -65,6 +69,11 @@ def quit_func():
     
     win.close()
     core.quit()
+    
+## add global event keys to shutdown the program at any time
+event.globalKeys.clear()
+for key in ['q','escape']:
+    event.globalKeys.add(key, func=quit_func)
     
 ## define the run trial
 def runTrial(trial_pars, data_file, subjInfo, mode):
@@ -208,12 +217,6 @@ def runTrial(trial_pars, data_file, subjInfo, mode):
     win.flip()
     core.wait(random.choice(range(1000, 2001))*0.001)
     
-    ## add global event keys to shutdown the program at any time
-    event.globalKeys.clear()
-    for key in ['q','escape']:
-        event.globalKeys.add(key, func=quit_func)
-    
-    
 ## define the run block
 def runBlock(mode, DATA_FILE, SUBJ_INFO):
     # prepare the trials
@@ -233,8 +236,11 @@ def runBlock(mode, DATA_FILE, SUBJ_INFO):
         
         trialCount += 1
     
-## ---------- Real experiment starts from here ----------##
-## Hide the full screen before the gui dialog
+## ======================================= ##
+##    Real experiment starts from here     ##
+## ======================================= ##
+
+# ## Hide the full screen before the gui dialog
 #win.winHandle.set_fullscreen(False) # use on mac only, remove it if you run on Windows
 #win.winHandle.set_visible(False) 
 
@@ -258,7 +264,6 @@ event.Mouse(visible=False) # will use win by default
 # let's flip one frame at first to solve the non full scr problem, 
 # not sure the specific reason now.
 win.flip()
-
 text_msg.text = u"红色五边形出现在左侧时按z键，\n出现在右侧时按/键。\n\n按空格键开始实验！"
 text_msg.draw()
 win.flip()
@@ -271,6 +276,7 @@ text_msg.text = u"练习结束, 按空格键开始正式实验!"
 text_msg.draw()
 win.flip()
 event.waitKeys(keyList=['space'])
+
 # run main test trials
 runBlock('test', data_file, participant)
 
