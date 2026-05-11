@@ -67,6 +67,7 @@ def quit_func():
     win.flip()
     core.wait(2)
     
+    data_file.close()
     win.close()
     core.quit()
     

@@ -4,7 +4,7 @@ from psychopy import visual, core, event
 # 1. 实验基本参数与设计
 # ==========================================
 TRIGGER_KEY = '5'
-TR = 2.0
+TR = 2.0                             # 单位：秒
 DUMMY_VOLUMES = 3
 DUMMY_DURATION = TR * DUMMY_VOLUMES  # 前置空扫时间：6.0秒
 
